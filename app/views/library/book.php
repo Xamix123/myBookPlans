@@ -41,7 +41,7 @@
                                     <?php if (! empty($book['countPages'])) : ?>
                                         <p><b>Количество Страниц:</b><?php echo $book['countPages'] ?></p>
                                     <?php endif; ?>
-                                    <p><b>Статус</b> <?php echo $book['publishing_house'] ?></p>
+                                    <p><b>Статус:</b> <?php echo $book['status'] ?></p>
 
                                 </div><!--/book-information-->
                                 <div class="col-lg-offset-2">

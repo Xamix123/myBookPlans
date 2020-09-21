@@ -19,13 +19,13 @@ class Library
         $db = Db::getConnection();
         $sql = "SELECT id FROM user_lib WHERE id_user = :userId;";
 
-        $result = $db->prepare($sql);
-        $result->bindParam(':userId', $userId, PDO::PARAM_INT);
-        $result->setFetchMode(PDO::FETCH_ASSOC);
+        $request = $db->prepare($sql);
+        $request->bindParam(':userId', $userId, PDO::PARAM_INT);
+        $request->setFetchMode(PDO::FETCH_ASSOC);
 
-        $result->execute();
+        $request->execute();
 
-        return $result->fetch();
+        return $request->fetch();
     }
 
     /**
@@ -56,14 +56,14 @@ class Library
                     . "LIMIT " . $count
                     . " OFFSET " . $offset;
 
-            $result = $db->prepare($sql);
-            $result->bindParam(':id', $userId, PDO::PARAM_INT);
-            $result->setFetchMode(PDO::FETCH_ASSOC);
+            $request = $db->prepare($sql);
+            $request->bindParam(':id', $userId, PDO::PARAM_INT);
+            $request->setFetchMode(PDO::FETCH_ASSOC);
 
-            $result->execute();
+            $request->execute();
 
             $i = 0;
-            while ($row = $result->fetch()) {
+            while ($row = $request->fetch()) {
                 $booksIds[$i]['id'] = $row['id_book'];
                 $i++;
             }
@@ -86,15 +86,34 @@ class Library
                         ON user_lib.id = user_lib_record.id_user_lib 
                     WHERE user_lib.id = :id;";
 
-            $result = $db->prepare($sql);
-            $result->bindParam(':id', $userId, PDO::PARAM_INT);
-            $result->setFetchMode(PDO::FETCH_ASSOC);
-            $result->execute();
+            $request = $db->prepare($sql);
+            $request->bindParam(':id', $userId, PDO::PARAM_INT);
+            $request->setFetchMode(PDO::FETCH_ASSOC);
+            $request->execute();
 
-            $row = $result->fetch();
+            $row = $request->fetch();
 
             return $row['count'];
         }
+    }
+
+    /**
+     * @param int $userLibId
+     * @param int $bookId
+     * @return int
+     */
+    public static function getUserLibRecordBookStatus($userLibId, $bookId)
+    {
+        $db = Db::getConnection();
+        $sql ="SELECT status FROM user_lib_record WHERE id =:userLibId AND id_book =:bookId";
+        $request = $db->prepare($sql);
+        $request->bindParam(':userLibId', $userLibId, PDO::PARAM_INT);
+        $request->bindParam(':bookId', $bookId, PDO::PARAM_INT);
+        $request->setFetchMode(PDO::FETCH_ASSOC);
+
+        $request->execute();
+
+        return $request->fetch();
     }
 
     /**
@@ -114,14 +133,14 @@ class Library
                         ON user_lib.id = user_lib_record.id_user_lib 
                     WHERE user_lib.id = :id AND user_lib_record.id_book =:idBook;";
 
-            $result = $db->prepare($sql);
-            $result->bindParam(':id', $userId, PDO::PARAM_INT);
-            $result->bindParam(':idBook', $bookId, PDO::PARAM_INT);
-            $result->setFetchMode(PDO::FETCH_NUM);
+            $request = $db->prepare($sql);
+            $request->bindParam(':id', $userId, PDO::PARAM_INT);
+            $request->bindParam(':idBook', $bookId, PDO::PARAM_INT);
+            $request->setFetchMode(PDO::FETCH_NUM);
 
-            $result->execute();
+            $request->execute();
 
-            return $result->fetch();
+            return $request->fetch();
         }
     }
 
@@ -139,11 +158,29 @@ class Library
         $sql = "INSERT INTO user_lib_record(id_user_lib, id_book, status) "
             . "VALUES (:userLibId, :bookId, :status)";
 
-        $result = $db->prepare($sql);
-        $result->bindParam(':userLibId', $userLibId, PDO::PARAM_INT);
-        $result->bindParam(':bookId', $bookId, PDO::PARAM_INT);
-        $result->bindParam(':status', $status, PDO::PARAM_INT);
+        $request = $db->prepare($sql);
+        $request->bindParam(':userLibId', $userLibId, PDO::PARAM_INT);
+        $request->bindParam(':bookId', $bookId, PDO::PARAM_INT);
+        $request->bindParam(':status', $status, PDO::PARAM_INT);
 
-        return $result->execute();
+        return $request->execute();
+    }
+
+    public static function deleteUserLibRecord($userLibId, $bookId)
+    {
+        $result = 0;
+        $db = DB::getConnection();
+
+        $sql = "DELETE FROM user_lib_record WHERE id_user_lib =:userLibId AND id_book =:bookId";
+
+        $request = $db->prepare($sql);
+        $request->bindParam(':userLibId', $userLibId, PDO::PARAM_INT);
+        $request->bindParam(':bookId', $bookId, PDO::PARAM_INT);
+
+        if ($request->execute()) {
+            $result = $bookId;
+        }
+
+        return $result;
     }
 }

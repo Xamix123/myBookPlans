@@ -8,8 +8,16 @@ use myBookPlans\app\models\User;
 use myBookPlans\app\models\Library;
 use myBookPlans\app\validators\BookDataValidator;
 
+/**
+ * Class LibraryController
+ * @package myBookPlans\app\controllers
+ */
 class LibraryController
 {
+    /**
+     * @param int $page
+     * @return bool
+     */
     public function actionIndex($page = 1)
     {
         $userId = User::checkLogged();
@@ -34,6 +42,10 @@ class LibraryController
         return true;
     }
 
+    /**
+     * @param int $bookId
+     * @return bool
+     */
     public function actionBook($bookId)
     {
         $userId = User::checkLogged();
@@ -43,15 +55,23 @@ class LibraryController
         $book = [];
         if ($bookStatus) {
             $book = Book::getBookById($bookId);
+            $book['img'] = Book::getImagePath($book['id']);
+
+            $userLibId = Library::getIdUserLibrary($userId);
+
+            $book['status'] = Library::getUserLibRecordBookStatus($userLibId, $bookId);
+            $book['status'] = $book['status'] == 1
+                ? "Прочитано"
+                : "Не прочитано";
         }
-
-        $book['img'] = Book::getImagePath($book['id']);
-
         require_once(ROOT . "/app/views/library/book.php");
 
         return true;
     }
 
+    /**
+     * @return bool
+     */
     public function actionAddBook()
     {
         $data = [];
@@ -114,11 +134,30 @@ class LibraryController
                         move_uploaded_file($_FILES["image"]["tmp_name"], $_SERVER['DOCUMENT_ROOT'] .
                             "/app/upload/images/books/{$bookId}"."$imgExtension");
                     }
-                };
+                }
             }
         }
 
         require_once(ROOT . "/app/views/library/addBook.php");
+
+        return true;
+    }
+
+    /**
+     * @param int $bookId
+     * @return bool
+     */
+    public function actionDeleteBook($bookId)
+    {
+        $userId = User::checkLogged();
+
+        if (Library::checkLibraryContainsBook($userId, $bookId)) {
+            $userLibId = Library::getIdUserLibrary($userId);
+            $bookId = Library::deleteUserLibRecord($userLibId, $bookId);
+            var_export($bookId);die();
+        }
+
+        require_once(ROOT . "/app/views/library/book/.php");
 
         return true;
     }

@@ -8,9 +8,9 @@ return [
     'cabinet' => 'cabinet/index',
 
     'library/addBook' => 'library/addBook',
-    'library/updateBook/([0-9]+)' => 'library/updateBook',
+    'library/updateBook/([0-9]+)' => 'library/updateBook/$1',
     'library/book/([0-9]+)' => 'library/book/$1',
-    'library/deleteBook/([0-9]+)' => 'library/deleteBook',
+    'library/deleteBook/([0-9]+)' => 'library/deleteBook/$1',
     'library/page-([0-9]+)' => 'library/index/$1',
     'library' => 'library/index',
 
