@@ -45,11 +45,11 @@
 
                                 </div><!--/book-information-->
                                 <div class="col-lg-offset-2">
-                                    <a href="/library/update/<?php echo $book['id']; ?>"
+                                    <a href="/library/updateBook/<?php echo $book['id']; ?>"
                                        class="btn btn-default add-to-cart">Редактировать книгу
                                     </a>
 
-                                    <a href="/library/delete/<?php echo $book['id']; ?>"
+                                    <a href="/library/deleteBook/<?php echo $book['id']; ?>"
                                        class="btn btn-default add-to-cart">Удалить книгу
                                     </a>
                                 </div>

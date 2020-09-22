@@ -24,6 +24,9 @@ class LibraryController
         $limit = Book::SHOW_BY_DEFAULT;
 
         $total = Library::getCountBooksInUserLibrary($userId);
+
+        $userLibId = Library::getIdUserLibrary($userId);
+
         if ($total > 0) {
             $booksIds = Library::getListBooksIds($userId, $page);
         }
@@ -50,14 +53,14 @@ class LibraryController
     {
         $userId = User::checkLogged();
 
-        $bookStatus = Library::checkLibraryContainsBook($userId, $bookId);
+        $userLibId = Library::getIdUserLibrary($userId);
+
+        $bookStatus = Library::checkLibraryContainsBook($userLibId, $bookId);
 
         $book = [];
         if ($bookStatus) {
             $book = Book::getBookById($bookId);
             $book['img'] = Book::getImagePath($book['id']);
-
-            $userLibId = Library::getIdUserLibrary($userId);
 
             $book['status'] = Library::getUserLibRecordBookStatus($userLibId, $bookId);
             $book['status'] = $book['status'] == 1
@@ -143,6 +146,21 @@ class LibraryController
         return true;
     }
 
+    public function actionUpdateBook($bookId)
+    {
+        $userId = User::checkLogged();
+
+        $userLibId = Library::getIdUserLibrary($userId);
+
+        if (Library::checkLibraryContainsBook($userLibId, $bookId)) {
+            $bookId = Library::deleteUserLibRecord($userLibId, $bookId);
+        }
+
+        header("Location: /library/");
+
+        return true;
+    }
+
     /**
      * @param int $bookId
      * @return bool
@@ -151,13 +169,13 @@ class LibraryController
     {
         $userId = User::checkLogged();
 
-        if (Library::checkLibraryContainsBook($userId, $bookId)) {
-            $userLibId = Library::getIdUserLibrary($userId);
+        $userLibId = Library::getIdUserLibrary($userId);
+
+        if (Library::checkLibraryContainsBook($userLibId, $bookId)) {
             $bookId = Library::deleteUserLibRecord($userLibId, $bookId);
-            var_export($bookId);die();
         }
 
-        require_once(ROOT . "/app/views/library/book/.php");
+        header("Location: /library/");
 
         return true;
     }

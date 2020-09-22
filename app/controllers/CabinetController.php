@@ -2,6 +2,7 @@
 
 namespace myBookPlans\app\controllers;
 
+use myBookPlans\app\models\Library;
 use myBookPlans\app\models\User;
 
 class CabinetController
@@ -11,6 +12,11 @@ class CabinetController
         $userId = User::checkLogged();
 
         $user = User::getUserById($userId);
+
+        if(!Library::checkUserLibraryExists($userId))
+        {
+            Library::createNewUserLibrary($userId);
+        }
 
         require_once(ROOT . '/app/views/cabinet/index.php');
 

@@ -3,6 +3,6 @@ return [
     'host' => 'localhost',
     'dbname' => 'myBookPlans',
     'user' => 'root',
-    'password' => 'кщще',
+    'password' => '',
     'charset' => 'utf8'
 ];

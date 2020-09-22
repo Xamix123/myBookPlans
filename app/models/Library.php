@@ -24,8 +24,9 @@ class Library
         $request->setFetchMode(PDO::FETCH_ASSOC);
 
         $request->execute();
+        $result =$request->fetch();
 
-        return $request->fetch();
+        return $result['id'];
     }
 
     /**
@@ -51,13 +52,13 @@ class Library
             $sql = "SELECT id_book FROM user_lib 
                     INNER JOIN user_lib_record 
                         ON user_lib.id = user_lib_record.id_user_lib 
-                    WHERE user_lib.id = :id"
+                    WHERE user_lib.id_user = :userId"
                     . " ORDER BY id_book DESC "
                     . "LIMIT " . $count
                     . " OFFSET " . $offset;
 
             $request = $db->prepare($sql);
-            $request->bindParam(':id', $userId, PDO::PARAM_INT);
+            $request->bindParam(':userId', $userId, PDO::PARAM_INT);
             $request->setFetchMode(PDO::FETCH_ASSOC);
 
             $request->execute();
@@ -81,13 +82,12 @@ class Library
     {
         if ($userId) {
             $db = Db::getConnection();
-            $sql = "SELECT count(id_book) AS count FROM user_lib 
-                    INNER JOIN user_lib_record 
-                        ON user_lib.id = user_lib_record.id_user_lib 
-                    WHERE user_lib.id = :id;";
+            $sql = "SELECT COUNT(id_book) AS count FROM user_lib_record 
+                    INNER JOIN user_lib ON user_lib_record.id_user_lib = user_lib.id
+                    WHERE user_lib.id_user =:userId";
 
             $request = $db->prepare($sql);
-            $request->bindParam(':id', $userId, PDO::PARAM_INT);
+            $request->bindParam(':userId', $userId, PDO::PARAM_INT);
             $request->setFetchMode(PDO::FETCH_ASSOC);
             $request->execute();
 
@@ -119,23 +119,37 @@ class Library
     /**
      * return array booksIds
      *
-     * @param int $userId
+     * @param int $userLibId
      * @param int $bookId
      *
      * @return mixed
      */
-    public static function checkLibraryContainsBook($userId, $bookId)
+    public static function checkLibraryContainsBook($userLibId, $bookId)
+    {
+            $db = Db::getConnection();
+            $sql = "SELECT id_book FROM user_lib_record 
+                    WHERE user_lib_record.id_user_lib = :userLibId 
+                    AND user_lib_record.id_book =:idBook;";
+
+            $request = $db->prepare($sql);
+            $request->bindParam(':userLibId', $userLibId, PDO::PARAM_INT);
+            $request->bindParam(':idBook', $bookId, PDO::PARAM_INT);
+            $request->setFetchMode(PDO::FETCH_NUM);
+
+            $request->execute();
+
+            return $request->fetch();
+    }
+
+    public static function checkUserLibraryExists($userId)
     {
         if ($userId) {
             $db = Db::getConnection();
-            $sql = "SELECT id_book FROM user_lib 
-                    INNER JOIN user_lib_record 
-                        ON user_lib.id = user_lib_record.id_user_lib 
-                    WHERE user_lib.id = :id AND user_lib_record.id_book =:idBook;";
+            $sql = "SELECT id_user FROM user_lib 
+                    WHERE user_lib.id_user = :userId";
 
             $request = $db->prepare($sql);
-            $request->bindParam(':id', $userId, PDO::PARAM_INT);
-            $request->bindParam(':idBook', $bookId, PDO::PARAM_INT);
+            $request->bindParam(':userId', $userId, PDO::PARAM_INT);
             $request->setFetchMode(PDO::FETCH_NUM);
 
             $request->execute();
@@ -164,6 +178,24 @@ class Library
         $request->bindParam(':status', $status, PDO::PARAM_INT);
 
         return $request->execute();
+    }
+
+    /**
+     * @param int $userId
+     * @return bool
+     */
+    public static function createNewUserLibrary($userId)
+    {
+        $db = DB::getConnection();
+
+        $sql = "INSERT INTO user_lib(id_user) "
+            . "VALUES (:userId)";
+
+        $request = $db->prepare($sql);
+        $request->bindParam(':userId', $userId, PDO::PARAM_INT);
+
+        return $request->execute();
+
     }
 
     public static function deleteUserLibRecord($userLibId, $bookId)

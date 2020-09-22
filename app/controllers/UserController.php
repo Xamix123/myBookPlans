@@ -2,6 +2,7 @@
 
 namespace myBookPlans\app\controllers;
 
+use myBookPlans\app\models\Library;
 use myBookPlans\app\models\User;
 use myBookPlans\app\validators\UserDataValidator;
 
