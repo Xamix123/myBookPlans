@@ -128,6 +128,9 @@ class User
         header("Location: /user/login");
     }
 
+    /**
+     * @return bool
+     */
     public static function isGuest()
     {
         $result = true;

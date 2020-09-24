@@ -2,7 +2,6 @@
 
 namespace myBookPlans\app\controllers;
 
-use myBookPlans\app\models\Library;
 use myBookPlans\app\models\User;
 use myBookPlans\app\validators\UserDataValidator;
 
@@ -19,14 +18,14 @@ class UserController
 
             $errors = false;
 
-            $userId = USER::checkUserData($data['email'], $data['password']);
+            $userId = User::checkUserData($data['email'], $data['password']);
 
             if ($userId == false) {
                 // если данные неправильные показываем ошибку
                 $errors[] = "Неправильные данные для входа на сайт";
             } else {
                 // Если данные правильные записываем пользователя в сессию
-                USER::auth($userId);
+                User::auth($userId);
 
                 //переправляем пользователя в закрытую часть кабинет
                 header("Location: /cabinet/");

@@ -24,6 +24,20 @@ class BookDataValidator implements ValidatorInterface
     }
 
     /**
+     * @param $data
+     * @return string
+     */
+    public static function validateTextData($data)
+    {
+
+        $data = trim($data);
+        $data = html_entity_decode($data);
+        $data = htmlspecialchars_decode($data, ENT_NOQUOTES);
+
+        return $data;
+    }
+
+    /**
      * validate data array
      *
      * @param $data

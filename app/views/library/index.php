@@ -13,16 +13,6 @@
                             </div>
                             <div class="panel panel-default">
                                 <div class="panel-heading">
-                                    <h4 class="panel-title"><a href="#">Прочитанное</a></h4>
-                                </div>
-                            </div>
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
-                                    <h4 class="panel-title"><a href="#">Не прочитанное</a></h4>
-                                </div>
-                            </div>
-                            <div class="panel panel-default">
-                                <div class="panel-heading">
                                     <h4 class="panel-title"><a href="/library/addBook/">Добавить книгу</a></h4>
                                 </div>
                             </div>

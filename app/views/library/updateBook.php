@@ -1,4 +1,4 @@
-<?php if ($bookId): ?>
+<?php if ($updateBookId): ?>
     <?php header("Location: /library/") ?>;
 <?php endif; ?>
 
@@ -42,35 +42,46 @@
                     <form action="#" method="post" enctype="multipart/form-data">
 
                         <p>Название</p>
-                        <input type="text" name="title" maxlength="100" placeholder="" value="">
+                        <input type="text" name="title" maxlength="100" placeholder="" value="<?php echo $bookData['title'] ?>">
 
                         <p>Автор</p>
-                        <input type="text" name="author" maxlength="100" placeholder="" value="">
+                        <input type="text" name="author" maxlength="100" placeholder="" value="<?php echo $bookData['author'] ?>">
 
                         <p>Издательство</p>
-                        <input type="text" name="publishingHouse" maxlength="100" placeholder="" value="">
+                        <input type="text" name="publishingHouse" maxlength="100" placeholder="" value="<?php echo $bookData['publishing_house'] ?>">
 
                         <p>Серия</p>
-                        <input type="text" name="series" maxlength="100" placeholder="" value="">
+                        <input type="text" name="series" maxlength="100" placeholder="" value="<?php echo $bookData['series'] ?>">
 
                         <p>Изображение</p>
-                        <input type="file" name="image" placeholder="" value="">
+                        <div class="view-product">
+                            <img src="<?php echo $bookData['img']?>" alt="" />
+                        </div>
+                        <input type="file" name="image" placeholder="" value="<?php echo $bookData['img'] ?>">
 
                         <p>Количество страниц</p>
-                        <input type="number" name="countPages" min="0" max="999999" placeholder="" value="">
+                        <input type="number" name="countPages" min="0" max="999999" placeholder="" value="<?php echo $bookData['count_pages'] ?>">
 
                         <p>Описание</p>
-                        <textarea name="description" rows="10" maxlength="1000" placeholder=""></textarea>
+                        <textarea name="description" rows="10" maxlength="1000" placeholder="<?php echo $bookData['description'] ?>"></textarea>
 
                         <br/>
                         <br/>
 
                         <p>Статус</p>
                         <select name="status">
-                            <option value="0">
+                            <option  value="0"
+                                <?php if($bookData['status'] == 0):?>
+                                    selected
+                                <?php endif; ?>
+                            >
                                 Не прочитано
                             </option>
-                            <option value="1">
+                            <option  value="1"
+                                <?php if($bookData['status'] == 1):?>
+                                   selected
+                                <?php endif; ?>
+                            >
                                 Прочитано
                             </option>
                         </select>

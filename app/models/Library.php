@@ -8,7 +8,7 @@ use PDO;
 class Library
 {
     /**
-     * get id user library
+     * Get id user library
      *
      * @param int $userId
      *
@@ -100,12 +100,13 @@ class Library
     /**
      * @param int $userLibId
      * @param int $bookId
+     *
      * @return int
      */
     public static function getUserLibRecordBookStatus($userLibId, $bookId)
     {
         $db = Db::getConnection();
-        $sql ="SELECT status FROM user_lib_record WHERE id =:userLibId AND id_book =:bookId";
+        $sql ="SELECT status FROM user_lib_record WHERE id_user_lib =:userLibId AND id_book =:bookId";
         $request = $db->prepare($sql);
         $request->bindParam(':userLibId', $userLibId, PDO::PARAM_INT);
         $request->bindParam(':bookId', $bookId, PDO::PARAM_INT);
@@ -113,11 +114,13 @@ class Library
 
         $request->execute();
 
-        return $request->fetch();
+        $result = $request->fetch();
+
+        return $result['status'];
     }
 
     /**
-     * return array booksIds
+     * Return array booksIds
      *
      * @param int $userLibId
      * @param int $bookId
@@ -141,6 +144,10 @@ class Library
             return $request->fetch();
     }
 
+    /**
+     * @param $userId
+     * @return mixed
+     */
     public static function checkUserLibraryExists($userId)
     {
         if ($userId) {
@@ -181,12 +188,13 @@ class Library
     }
 
     /**
-     * @param int $userId
+     * @param $userId
+     *
      * @return bool
      */
     public static function createNewUserLibrary($userId)
     {
-        $db = DB::getConnection();
+        $db = Db::getConnection();
 
         $sql = "INSERT INTO user_lib(id_user) "
             . "VALUES (:userId)";
@@ -195,9 +203,35 @@ class Library
         $request->bindParam(':userId', $userId, PDO::PARAM_INT);
 
         return $request->execute();
-
     }
 
+    /**
+     * @param $userLibId
+     * @param $bookId
+     * @param $status
+     *
+     * @return bool
+     */
+    public static function updateUserLibraryRecordStatus($userLibId, $bookId, $status)
+    {
+        $db = Db::getConnection();
+
+        $sql = "UPDATE user_lib_record SET status =:status WHERE id_user_lib =:userLibId AND id_book =:bookId";
+
+        $request = $db->prepare($sql);
+        $request->bindParam(':userLibId', $userLibId, PDO::PARAM_INT);
+        $request->bindParam(':bookId', $bookId, PDO::PARAM_INT);
+        $request->bindParam(':status', $status, PDO::PARAM_INT);
+
+        return $request->execute();
+    }
+
+    /**
+     * @param $userLibId
+     * @param $bookId
+     *
+     * @return int
+     */
     public static function deleteUserLibRecord($userLibId, $bookId)
     {
         $result = 0;

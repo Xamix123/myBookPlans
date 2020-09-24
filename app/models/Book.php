@@ -8,6 +8,7 @@ use PDO;
 class Book
 {
     const SHOW_BY_DEFAULT = 6;
+    const BOOK_IMG_PATH = "/app/upload/images/books/";
 
     /**
      * get book by id
@@ -22,13 +23,24 @@ class Book
 
         $sql = "SELECT * FROM books WHERE id = :id";
 
-        $result = $db->prepare($sql);
-        $result->bindParam(':id', $id, PDO::PARAM_INT);
+        $request = $db->prepare($sql);
+        $request->bindParam(':id', $id, PDO::PARAM_INT);
 
-        $result->setFetchMode(PDO::FETCH_ASSOC);
-        $result->execute();
+        $request->setFetchMode(PDO::FETCH_ASSOC);
+        $request->execute();
 
-        return $result->fetch();
+        $book= [];
+
+        $row = $request->fetch();
+
+        $book['id'] = $row['id'];
+        $book['title'] = $row['title'];
+        $book['author'] = $row['author'];
+        $book['publishingHouse'] = $row['publishing_house'];
+        $book['series'] = $row['series'];
+        $book['countPages'] = $row['count_pages'];
+
+        return $book;
     }
 
     /**
@@ -59,49 +71,6 @@ class Book
         }
 
         return $books;
-    }
-
-    /**
-     * get Image extension
-     *
-     * @param $filePath
-     *
-     * @return string
-     */
-    public static function getImageExtension($filePath)
-    {
-        $result = "";
-        if (exif_imagetype($filePath) == IMAGETYPE_JPEG) {
-            $result = ".jpg";
-        } elseif (exif_imagetype($filePath) == IMAGETYPE_PNG) {
-            $result = ".png";
-        }
-
-        return $result;
-    }
-
-    /**
-     * get Image path
-     *
-     * @param int $bookId
-     *
-     * @return string
-     */
-    public static function getImagePath($bookId)
-    {
-        $result = "";
-
-        $path = "/app/upload/images/books/";
-
-        if (is_file(ROOT . $path . $bookId . ".jpg")) {
-            $result = $path . $bookId . ".jpg";
-        } elseif (is_file(ROOT . $path . $bookId . ".png")) {
-            $result = $path . $bookId . ".png";
-        } else {
-            $result = $path . "no-image.png";
-        }
-
-        return $result;
     }
 
     /**
@@ -164,6 +133,53 @@ class Book
         return $result;
     }
 
+    /**
+     * @param array $data
+     * @param int $bookId
+     *
+     * example data
+     * data {
+     *  'title' => "exampleTitle",
+     *  'author' => "exampleAuthor",
+     *  'publishingHouse' => "examplePublishingHouse",
+     *  'series' => "exampleSeries",
+     *  'countPages' => 123,
+     *  'description' => "example description about book"
+     * }
+     *
+     * @return int|string
+     */
+    public static function updateBook($data, $bookId)
+    {
+
+        $result = 0;
+
+        $db = Db::getConnection();
+
+        $sql = "UPDATE books SET title =:title, author =:author, publishing_house =:publishingHouse,
+                series =:series, count_pages = :countPages, description = :description
+                WHERE id =:bookId";
+
+        $request = $db->prepare($sql);
+        $request->bindParam(':title', $data['title'], PDO::PARAM_STR);
+        $request->bindParam(':author', $data['author'], PDO::PARAM_STR);
+        $request->bindParam(':publishingHouse', $data['publishingHouse'], PDO::PARAM_STR);
+        $request->bindParam(':series', $data['series'], PDO::PARAM_STR);
+        $request->bindParam(':countPages', $data['countPages'], PDO::PARAM_INT);
+        $request->bindParam(':description', $data['description'], PDO::PARAM_STR);
+        $request->bindParam(':bookId', $bookId, PDO::PARAM_INT);
+
+        if ($request->execute()) {
+            $result = $bookId;
+        }
+
+        return $result;
+    }
+
+    /**
+     * @param int $bookId
+     * @return int
+     */
     public static function deleteBook($bookId)
     {
         $result = 0;

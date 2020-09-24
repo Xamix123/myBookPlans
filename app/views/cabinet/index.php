@@ -7,11 +7,19 @@
                 <h1>Кабинет пользователя</h1>
 
                 <h3>Привет, <?php echo $user['name']; ?>!</h3>
-                <ul>
-                    <li><a href="/cabinet/edit">Редактировать данные</a></li>
-                    <li><a href="/library/">Библиотека пользователя</a></li>
-                    <li><a href="/cabinet/plans">Создать план чтения</a></li>
-                </ul>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="left-sidebar">
+                            <h2>Меню</h2>
+                            <div class="panel-group category-products" id="accordian"><!--menu-->
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        <h4 class="panel-title"><a href="/library/">Библиотека</a></h4>
+                                    </div>
+                                </div>
+                            </div><!--/menu-->
+                        </div>
+                    </div>
 
             </div>
         </div>

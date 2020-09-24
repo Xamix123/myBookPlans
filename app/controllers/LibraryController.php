@@ -4,6 +4,7 @@ namespace myBookPlans\app\controllers;
 
 use myBookPlans\app\components\Pagination;
 use myBookPlans\app\models\Book;
+use myBookPlans\app\models\Image;
 use myBookPlans\app\models\User;
 use myBookPlans\app\models\Library;
 use myBookPlans\app\validators\BookDataValidator;
@@ -35,7 +36,7 @@ class LibraryController
             $books = Book::getBooksByIds($booksIds);
 
             foreach ($books as $id => $book) {
-                $books[$id]['img'] = Book::getImagePath($book['id']);
+                $books[$id]['img'] = Image::getImagePath($book['id'], Book::BOOK_IMG_PATH);
             }
 
             $paginator = new Pagination($total, $page, $limit, 'page-');
@@ -47,6 +48,7 @@ class LibraryController
 
     /**
      * @param int $bookId
+     *
      * @return bool
      */
     public function actionBook($bookId)
@@ -60,7 +62,8 @@ class LibraryController
         $book = [];
         if ($bookStatus) {
             $book = Book::getBookById($bookId);
-            $book['img'] = Book::getImagePath($book['id']);
+
+            $book['img'] = Image::getImagePath($book['id'], Book::BOOK_IMG_PATH);
 
             $book['status'] = Library::getUserLibRecordBookStatus($userLibId, $bookId);
             $book['status'] = $book['status'] == 1
@@ -112,13 +115,11 @@ class LibraryController
                 $data['description']
             ];
 
-            foreach ($textData as $item) {
-                $item = trim($item);
-                $item = html_entity_decode($item);
-                $item = htmlspecialchars_decode($item, ENT_NOQUOTES);
+            foreach ($textData as $id => $item) {
+                $textData[$id] = BookDataValidator::validateTextData($item);
             }
 
-            $data = array_replace($data, $textData);
+            $data = array_merge($data, $textData);
 
             BookDataValidator::validateData($data, $errors);
 
@@ -133,7 +134,7 @@ class LibraryController
                 if ($bookId) {
                     // Если файл загрузился переместим его в нужную папку и переименуем
                     if (is_uploaded_file($_FILES["image"]["tmp_name"])) {
-                        $imgExtension = Book::getImageExtension($data['img']['tmp_name']);
+                        $imgExtension = Image::getImageExtension($data['img']['tmp_name']);
                         move_uploaded_file($_FILES["image"]["tmp_name"], $_SERVER['DOCUMENT_ROOT'] .
                             "/app/upload/images/books/{$bookId}"."$imgExtension");
                     }
@@ -146,17 +147,75 @@ class LibraryController
         return true;
     }
 
+    /**
+     * @param $bookId
+     *
+     * @return bool
+     */
     public function actionUpdateBook($bookId)
     {
         $userId = User::checkLogged();
+        $updateBookId = null;
 
         $userLibId = Library::getIdUserLibrary($userId);
 
         if (Library::checkLibraryContainsBook($userLibId, $bookId)) {
-            $bookId = Library::deleteUserLibRecord($userLibId, $bookId);
+            $bookData = Book::getBookById($bookId);
+
+            $bookData['img'] = Image::getImagePath($bookId, Book::BOOK_IMG_PATH);
+            $bookData['status'] = Library::getUserLibRecordBookStatus($userLibId, $bookId);
+
+            if (isset($_POST['submit'])) {
+                $data = [
+                    "title" => $_POST['title'],
+                    "author" => $_POST['author'],
+                    "publishingHouse" => $_POST['publishingHouse'],
+                    "series" => $_POST['series'],
+                    "countPages" => $_POST['countPages'],
+                    "img" => $_FILES['image'],
+                    "description" => $_POST['description'],
+                    "status" => $_POST['status']
+                ];
+
+                $textData = [
+                    'title' => $data['title'],
+                    'author' => $data['author'],
+                    'publishingHouse' => $data['publishingHouse'],
+                    'series' => $data['series'],
+                    'description' => $data['description']
+                ];
+
+              foreach ($textData as $id => $item) {
+                  $textData[$id] = BookDataValidator::validateTextData($item);
+              }
+
+                $data = array_merge($data, $textData);
+
+                BookDataValidator::validateData($data, $errors);
+
+                if (empty($errors)) {
+                    //если валидация прошла успешно создаем новую запись
+                    $updateBookId = Book::updateBook($data, $bookId);
+
+                    //добавляем новую запись в библиотеку пользователя
+
+                    Library::updateUserLibraryRecordStatus($userLibId, $updateBookId, $data['status']);
+
+                    //если запись добавлена
+                    if ($updateBookId) {
+                        // Если файл загрузился переместим его в нужную папку и переименуем
+                        if (is_uploaded_file($_FILES["image"]["tmp_name"])) {
+                            $imgExtension = Image::getImageExtension($data['img']['tmp_name']);
+                            move_uploaded_file($_FILES["image"]["tmp_name"], $_SERVER['DOCUMENT_ROOT'] .
+                                "/app/upload/images/books/{$bookId}" . "$imgExtension");
+                        }
+                    }
+                }
+            }
         }
 
-        header("Location: /library/");
+
+        require_once(ROOT . "/app/views/library/updateBook.php");
 
         return true;
     }

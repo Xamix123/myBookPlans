@@ -37,7 +37,10 @@
                                 <div class="product-information"><!--/book-information-->
                                     <h2><?php echo $book['title']; ?></h2>
                                     <p><b>Автор:</b> <?php echo $book['author'] ?></p>
-                                    <p><b>Издательство:</b> <?php echo $book['publishing_house'] ?></p>
+                                    <p><b>Издательство:</b> <?php echo $book['publishingHouse'] ?></p>
+                                    <?php if (! empty($book['series'])) : ?>
+                                        <p><b>Серия:</b><?php echo $book['series'] ?></p>
+                                    <?php endif; ?>
                                     <?php if (! empty($book['countPages'])) : ?>
                                         <p><b>Количество Страниц:</b><?php echo $book['countPages'] ?></p>
                                     <?php endif; ?>
